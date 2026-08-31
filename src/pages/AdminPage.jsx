@@ -359,8 +359,8 @@ export default function AdminPage() {
             )}
 
             {/* Sermons Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-              <table className="w-full text-left text-xs">
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-x-auto shadow-sm">
+              <table className="w-full text-left text-xs min-w-[580px]">
                 <thead className="bg-[#FAF4EA] text-[#8F4D12] uppercase font-bold text-[10px] tracking-wider border-b border-gray-200">
                   <tr>
                     <th className="p-4">Titre & Prédicateur</th>
@@ -538,8 +538,8 @@ export default function AdminPage() {
         {activeTab === 'visits' && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-gray-900">Demandes de Première Visite ({visits.length})</h2>
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-              <table className="w-full text-left text-xs">
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-x-auto shadow-sm">
+              <table className="w-full text-left text-xs min-w-[620px]">
                 <thead className="bg-[#FAF4EA] text-[#8F4D12] uppercase font-bold text-[10px] tracking-wider border-b border-gray-200">
                   <tr>
                     <th className="p-4">Visiteur</th>
@@ -642,8 +642,8 @@ export default function AdminPage() {
         {activeTab === 'donations' && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-gray-900">Dons & Offrandes en ligne</h2>
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-              <table className="w-full text-left text-xs">
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-x-auto shadow-sm">
+              <table className="w-full text-left text-xs min-w-[580px]">
                 <thead className="bg-[#FAF4EA] text-[#8F4D12] uppercase font-bold text-[10px] tracking-wider border-b border-gray-200">
                   <tr>
                     <th className="p-4">Donateur</th>
