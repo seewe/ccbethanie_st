@@ -172,10 +172,10 @@ export default function CommunityOriginsSection({ className = "" }) {
             {duplicatedList.map((item, idx) => (
               <div
                 key={`church-${item.id}-${idx}`}
-                className={`group shrink-0 flex items-center gap-4 px-5 py-3.5 bg-white rounded-2xl border ${item.borderAccent} shadow-xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 min-w-[320px] sm:min-w-[360px]`}
+                className={`group shrink-0 flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 bg-white rounded-2xl border ${item.borderAccent} shadow-xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 min-w-[280px] xs:min-w-[300px] sm:min-w-[360px]`}
               >
                 {/* Church Logo Seal */}
-                <div className="w-12 h-12 rounded-xl bg-white shadow-xs shrink-0 flex items-center justify-center p-0.5 ring-1 ring-gray-100 group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white shadow-xs shrink-0 flex items-center justify-center p-0.5 ring-1 ring-gray-100 group-hover:scale-105 transition-transform">
                   {item.type === 'eec' ? (
                     <EECLogo className="w-full h-full" />
                   ) : (
@@ -185,15 +185,15 @@ export default function CommunityOriginsSection({ className = "" }) {
 
                 {/* Church Details */}
                 <div className="flex flex-col text-left flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-[#8F4D12] transition-colors leading-tight truncate">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="text-xs sm:text-base font-bold text-gray-900 group-hover:text-[#8F4D12] transition-colors leading-tight truncate">
                       {item.name}
                     </span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shrink-0 ${item.badgeColor}`}>
+                    <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider border shrink-0 ${item.badgeColor}`}>
                       {item.shortName}
                     </span>
                   </div>
-                  <span className="text-[11px] text-gray-500 font-medium mt-0.5 truncate">
+                  <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium mt-0.5 truncate">
                     {item.subtitle}
                   </span>
                 </div>
