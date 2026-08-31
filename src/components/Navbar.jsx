@@ -37,45 +37,52 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full transition-all duration-200">
-      {/* Top Notification / Information Ribbon */}
-      <div className="bg-[#181C22] text-[#E2E8F0] text-xs py-2 px-4 border-b border-[#2D3748] hidden md:block">
+    <header className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+      isScrolled ? 'shadow-md' : 'shadow-xs'
+    }`}>
+      {/* Top Contact & Information Ribbon - Always sticky with header */}
+      <div className="bg-[#14181F] text-[#E2E8F0] text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-[#2D3748]/70 backdrop-blur-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1.5 text-[#F2B852]">
+          {/* Left contact info: worship hour, address, email */}
+          <div className="flex items-center gap-3 sm:gap-6 text-[11px] sm:text-xs overflow-x-auto no-scrollbar py-0.5">
+            <div className="flex items-center gap-1.5 text-[#F2B852] shrink-0 font-medium">
               <Clock className="w-3.5 h-3.5" />
-              <span className="font-medium">{t('worshipNotice')}</span>
-              <span className="text-white font-semibold">{t('worshipHours')}</span>
+              <span className="hidden xs:inline">{t('worshipNotice')}</span>
+              <span className="text-white font-bold">{t('worshipHours')}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-gray-300">
+            
+            <div className="hidden sm:flex items-center gap-1.5 text-gray-300 shrink-0">
               <MapPin className="w-3.5 h-3.5 text-[#D48E2E]" />
               <span>{t('churchAddress')}</span>
             </div>
+
             <a 
               href="mailto:info@ccbethanie.ca" 
-              className="flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors shrink-0"
+              title="Courriel du secrétariat"
             >
               <Mail className="w-3.5 h-3.5 text-[#D48E2E]" />
               <span>info@ccbethanie.ca</span>
             </a>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Right link: Admin Portal */}
+          <div className="flex items-center gap-3 shrink-0 ml-2">
             <Link 
               to="/admin" 
-              className="text-gray-400 hover:text-white transition-colors flex items-center gap-1 text-[11px]"
+              className="text-gray-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] sm:text-[11px] font-medium"
               title="Espace Gestion Église"
             >
               <Shield className="w-3 h-3 text-amber-500" />
-              <span>{t('adminTitle')}</span>
+              <span className="hidden sm:inline">{t('adminTitle')}</span>
             </Link>
           </div>
         </div>
       </div>
 
       {/* Main Navigation Bar */}
-      <nav className={`w-full bg-white transition-shadow duration-300 ${
-        isScrolled ? 'shadow-md py-2.5' : 'shadow-sm py-3.5'
+      <nav className={`w-full bg-white/98 backdrop-blur-md transition-all duration-300 ${
+        isScrolled ? 'py-2 sm:py-2.5 border-b border-gray-200/80' : 'py-3 sm:py-3.5 border-b border-gray-100'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           

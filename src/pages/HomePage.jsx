@@ -498,7 +498,7 @@ export default function HomePage({ onOpenVisitModal, onOpenDonationModal, onOpen
       {/* Lightbox / Zoom Modal */}
       {selectedPhotoIdx !== null && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fadeIn"
+          className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fadeIn"
           onClick={() => setSelectedPhotoIdx(null)}
         >
           {/* Close button */}
