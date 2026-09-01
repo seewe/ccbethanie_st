@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { 
   Database, Plus, Trash2, Edit3, Check, X, 
   Calendar, BookOpen, Users, Heart, MessageSquare, 
-  DollarSign, RefreshCw, AlertCircle, Sparkles, CheckCircle2 
+  DollarSign, RefreshCw, AlertCircle, Sparkles, CheckCircle2,
+  Lock, LogOut
 } from 'lucide-react';
-import { apiService } from '../services/api.js';
+import { apiService, authService } from '../services/api.js';
 
 export default function AdminPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState(null);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('sermons');
   const [sermons, setSermons] = useState([]);
   const [events, setEvents] = useState([]);
@@ -50,9 +55,9 @@ export default function AdminPage() {
       const [sermonsData, eventsData, prayersData, visitsData, contactsData, donationsData] = await Promise.all([
         apiService.getSermons(),
         apiService.getEvents(),
-        apiService.getPrayers(),
-        apiService.getVisits(),
-        apiService.getContacts(),
+        apiService.getAllPrayersAdmin(),
+        apiService.getVisitsAdmin(),
+        apiService.getContactsAdmin(),
         apiService.getDonations()
       ]);
       setSermons(sermonsData);
@@ -60,7 +65,7 @@ export default function AdminPage() {
       setPrayers(prayersData);
       setVisits(visitsData);
       setContacts(contactsData);
-      setDonations(donationsData?.donations || []);
+      setDonations(donationsData?.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -69,8 +74,46 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    loadAll();
+    authService.verifySession().then((valid) => {
+      setIsAuthenticated(valid);
+    });
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadAll();
+    }
+  }, [isAuthenticated]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError(null);
+    try {
+      const result = await authService.login(loginPassword);
+      if (result.ok && result.success) {
+        setIsAuthenticated(true);
+        setLoginPassword('');
+      } else {
+        setLoginError(result.message || 'Connexion impossible.');
+      }
+    } catch {
+      setLoginError('Erreur de connexion au serveur.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setIsAuthenticated(false);
+    setSermons([]);
+    setEvents([]);
+    setPrayers([]);
+    setVisits([]);
+    setContacts([]);
+    setDonations([]);
+  };
 
   const handleCreateSermon = async (e) => {
     e.preventDefault();
@@ -133,6 +176,65 @@ export default function AdminPage() {
     }
   };
 
+  if (isAuthenticated === null) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center py-10">
+        <p className="text-sm text-gray-500">Vérification de la session...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center py-10 px-4">
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100 p-8"
+        >
+          <div className="flex items-center gap-2 text-xs font-bold text-[#C9862C] uppercase tracking-wider mb-2">
+            <Lock className="w-4 h-4" />
+            <span>Accès administrateur</span>
+          </div>
+          <h1 className="text-2xl font-serif font-bold text-[#121820] mb-2">
+            Connexion Béthanie
+          </h1>
+          <p className="text-sm text-gray-500 mb-6">
+            Entrez le mot de passe admin pour gérer le contenu du site.
+          </p>
+
+          <label className="block text-xs font-bold text-gray-700 mb-2" htmlFor="admin-password">
+            Mot de passe
+          </label>
+          <input
+            id="admin-password"
+            type="password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#C9862C] mb-4"
+            placeholder="Mot de passe admin"
+            required
+            autoFocus
+          />
+
+          {loginError && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-xl border border-red-200 text-xs font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loginLoading}
+            className="w-full py-3 bg-[#121820] hover:bg-[#1f2937] text-white rounded-xl text-sm font-bold transition-all cursor-pointer disabled:opacity-60"
+          >
+            {loginLoading ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -152,14 +254,23 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <button
-            onClick={loadAll}
-            disabled={loading}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center gap-2 border border-white/20 transition-all cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Actualiser les données</span>
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-xl text-xs font-bold flex items-center gap-2 border border-red-400/30 transition-all cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Déconnexion</span>
+            </button>
+            <button
+              onClick={loadAll}
+              disabled={loading}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center gap-2 border border-white/20 transition-all cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Actualiser les données</span>
+            </button>
+          </div>
         </div>
 
         {/* Status Message */}

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MapPin, Mail, Globe, Clock, 
-  Shield, Youtube, Facebook, Instagram 
+  Youtube, Facebook, Instagram 
 } from 'lucide-react';
 import Logo from './Logo.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
@@ -145,10 +145,6 @@ export default function Footer() {
           </Link>
           <Link to="/contact" className="hover:text-gray-300 transition-colors">
             {language === 'en' ? 'Terms & Conditions' : 'Termes & Conditions'}
-          </Link>
-          <Link to="/admin" className="text-gray-600 hover:text-amber-400 transition-colors flex items-center gap-1">
-            <Shield className="w-3 h-3" />
-            <span>{t('adminTitle')}</span>
           </Link>
         </div>
       </div>

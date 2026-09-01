@@ -1,8 +1,12 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -395,7 +399,343 @@ async function initMongo() {
 }
 initMongo();
 
+// ======================== ADMIN AUTH ========================
+const ADMIN_TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
+
+function getAdminPassword() {
+  if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
+  if (process.env.NODE_ENV === 'production') return null;
+  console.warn('ADMIN_PASSWORD non défini — mot de passe dev temporaire: bethanie-admin');
+  return 'bethanie-admin';
+}
+
+function createAdminToken() {
+  const secret = getAdminPassword();
+  if (!secret) return null;
+  const payload = Buffer.from(JSON.stringify({ exp: Date.now() + ADMIN_TOKEN_TTL_MS })).toString('base64url');
+  const signature = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+  return `${payload}.${signature}`;
+}
+
+function verifyAdminToken(token) {
+  if (!token) return false;
+  const secret = getAdminPassword();
+  if (!secret) return false;
+
+  const [payload, signature] = token.split('.');
+  if (!payload || !signature) return false;
+
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+  const sigBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (sigBuffer.length !== expectedBuffer.length) return false;
+  if (!crypto.timingSafeEqual(sigBuffer, expectedBuffer)) return false;
+
+  try {
+    const { exp } = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    return Date.now() < exp;
+  } catch {
+    return false;
+  }
+}
+
+function requireAdmin(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (verifyAdminToken(token)) return next();
+  res.status(401).json({ success: false, message: 'Accès non autorisé. Connexion admin requise.' });
+}
+
+function isPublicApiRoute(req) {
+  const { method, path: routePath } = req;
+
+  if (method === 'POST' && routePath === '/api/admin/login') return true;
+
+  if (method === 'GET') {
+    if (routePath === '/api/church-info') return true;
+    if (routePath === '/api/sermons') return true;
+    if (/^\/api\/sermons\/[^/]+$/.test(routePath)) return true;
+    if (routePath === '/api/events') return true;
+    if (routePath === '/api/ministries') return true;
+    if (routePath === '/api/team') return true;
+    if (routePath === '/api/testimonials') return true;
+    if (routePath === '/api/prayers') return true;
+  }
+
+  if (method === 'POST') {
+    if (routePath === '/api/prayers') return true;
+    if (/^\/api\/prayers\/[^/]+\/pray$/.test(routePath)) return true;
+    if (routePath === '/api/visits') return true;
+    if (routePath === '/api/donations') return true;
+    if (routePath === '/api/contact') return true;
+  }
+
+  return false;
+}
+
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api/')) return next();
+  if (isPublicApiRoute(req)) return next();
+  return requireAdmin(req, res, next);
+});
+
+// ======================== INPUT VALIDATION ========================
+function rejectBadRequest(res, message) {
+  return res.status(400).json({ success: false, message });
+}
+
+function trimmedString(value, maxLength) {
+  if (typeof value !== 'string') return null;
+  const text = value.trim();
+  if (!text || text.length > maxLength) return null;
+  return text;
+}
+
+function optionalString(value, maxLength) {
+  if (value == null || value === '') return '';
+  if (typeof value !== 'string') return null;
+  const text = value.trim();
+  if (text.length > maxLength) return null;
+  return text;
+}
+
+function isValidEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function positiveInt(value, min, max) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) return null;
+  return number;
+}
+
+function donationAmount(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 1 || number > 100000) return null;
+  return Math.round(number * 100) / 100;
+}
+
+function isValidDateString(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00`);
+  return !Number.isNaN(date.getTime());
+}
+
+function validatePrayerInput(body) {
+  const requestText = trimmedString(body?.requestText, 2000);
+  if (!requestText || requestText.length < 5) {
+    return { error: 'Veuillez décrire votre requête de prière (5 caractères minimum).' };
+  }
+
+  const isAnonymous = !!body?.isAnonymous;
+  if (!isAnonymous) {
+    const authorName = trimmedString(body?.authorName, 100);
+    if (!authorName) return { error: 'Veuillez indiquer votre prénom ou nom.' };
+  }
+
+  const category = optionalString(body?.category, 80);
+  if (category === null) return { error: 'Catégorie invalide.' };
+
+  return {
+    data: {
+      authorName: isAnonymous ? 'Anonyme' : trimmedString(body?.authorName, 100),
+      isAnonymous,
+      category: category || 'Autre',
+      requestText,
+      isPublic: body?.isPublic !== false,
+    },
+  };
+}
+
+function validateVisitInput(body) {
+  const name = trimmedString(body?.name, 100);
+  if (!name) return { error: 'Veuillez indiquer votre nom.' };
+
+  if (!isValidEmail(body?.email)) return { error: 'Adresse courriel invalide.' };
+
+  const phone = optionalString(body?.phone, 30);
+  if (phone === null) return { error: 'Numéro de téléphone invalide.' };
+
+  if (!isValidDateString(body?.visitDate)) return { error: 'Date de visite invalide.' };
+
+  const numberOfPeople = positiveInt(body?.numberOfPeople, 1, 20);
+  if (numberOfPeople === null) return { error: 'Nombre de personnes invalide (1 à 20).' };
+
+  const childrenCount = positiveInt(body?.childrenCount ?? 0, 0, 20);
+  if (childrenCount === null) return { error: 'Nombre d\'enfants invalide (0 à 20).' };
+
+  const hasQuestions = optionalString(body?.hasQuestions, 1000);
+  if (hasQuestions === null) return { error: 'Le champ questions est trop long.' };
+
+  return {
+    data: {
+      name,
+      email: body.email.trim(),
+      phone,
+      visitDate: body.visitDate,
+      numberOfPeople,
+      childrenCount,
+      hasQuestions,
+      needParkingInfo: body?.needParkingInfo !== false,
+    },
+  };
+}
+
+function validateDonationInput(body) {
+  const amount = donationAmount(body?.amount);
+  if (amount === null) return { error: 'Montant invalide (entre 1 $ et 100 000 $).' };
+
+  const isAnonymous = !!body?.isAnonymous;
+  let donorName = 'Donateur';
+  if (!isAnonymous) {
+    const name = trimmedString(body?.donorName, 100);
+    if (!name) return { error: 'Veuillez indiquer votre nom.' };
+    donorName = name;
+  }
+
+  const email = optionalString(body?.email, 120);
+  if (email === null) return { error: 'Adresse courriel invalide.' };
+  if (email && !isValidEmail(email)) return { error: 'Adresse courriel invalide.' };
+
+  const fund = optionalString(body?.fund, 100);
+  if (fund === null) return { error: 'Fonds de don invalide.' };
+
+  const paymentMethod = optionalString(body?.paymentMethod, 50);
+  if (paymentMethod === null) return { error: 'Mode de paiement invalide.' };
+
+  return {
+    data: {
+      donorName: isAnonymous ? 'Donateur Anonyme' : donorName,
+      email: email || '',
+      amount,
+      fund: fund || 'Dîmes & Offrandes',
+      paymentMethod: paymentMethod || 'Carte de crédit',
+      isAnonymous,
+    },
+  };
+}
+
+function validateContactInput(body) {
+  const name = trimmedString(body?.name, 100);
+  if (!name) return { error: 'Veuillez indiquer votre nom.' };
+
+  if (!isValidEmail(body?.email)) return { error: 'Adresse courriel invalide.' };
+
+  const subject = optionalString(body?.subject, 150);
+  if (subject === null) return { error: 'Sujet invalide.' };
+
+  const message = trimmedString(body?.message, 3000);
+  if (!message || message.length < 10) {
+    return { error: 'Veuillez écrire un message (10 caractères minimum).' };
+  }
+
+  const phone = optionalString(body?.phone, 30);
+  if (phone === null) return { error: 'Numéro de téléphone invalide.' };
+
+  return {
+    data: {
+      name,
+      email: body.email.trim(),
+      subject: subject || 'Contact général',
+      message,
+      phone,
+    },
+  };
+}
+
+function validateSermonInput(body, partial = false) {
+  const title = body?.title !== undefined ? trimmedString(body.title, 200) : (partial ? undefined : null);
+  if (!partial && !title) return { error: 'Le titre de la prédication est requis.' };
+  if (body?.title !== undefined && !title) return { error: 'Titre de prédication invalide.' };
+
+  const fields = {};
+  if (title) fields.title = title;
+  if (body?.speaker !== undefined) {
+    const speaker = trimmedString(body.speaker, 100);
+    if (!speaker) return { error: 'Nom du prédicateur invalide.' };
+    fields.speaker = speaker;
+  }
+  if (body?.description !== undefined) {
+    const description = optionalString(body.description, 3000);
+    if (description === null) return { error: 'Description trop longue.' };
+    fields.description = description;
+  }
+  if (body?.scripture !== undefined) {
+    const scripture = optionalString(body.scripture, 200);
+    if (scripture === null) return { error: 'Référence biblique invalide.' };
+    fields.scripture = scripture;
+  }
+  if (body?.series !== undefined) {
+    const series = optionalString(body.series, 120);
+    if (series === null) return { error: 'Série invalide.' };
+    fields.series = series;
+  }
+  if (body?.videoUrl !== undefined) {
+    const videoUrl = optionalString(body.videoUrl, 500);
+    if (videoUrl === null) return { error: 'Lien vidéo invalide.' };
+    fields.videoUrl = videoUrl;
+  }
+  if (body?.audioUrl !== undefined) {
+    const audioUrl = optionalString(body.audioUrl, 500);
+    if (audioUrl === null) return { error: 'Lien audio invalide.' };
+    fields.audioUrl = audioUrl;
+  }
+  if (body?.date !== undefined) {
+    const date = optionalString(body.date, 30);
+    if (date === null) return { error: 'Date invalide.' };
+    fields.date = date;
+  }
+  if (body?.featured !== undefined) fields.featured = !!body.featured;
+
+  return { data: fields };
+}
+
+function validateEventInput(body, partial = false) {
+  const title = body?.title !== undefined ? trimmedString(body.title, 200) : (partial ? undefined : null);
+  if (!partial && !title) return { error: 'Le titre de l\'événement est requis.' };
+  if (body?.title !== undefined && !title) return { error: 'Titre d\'événement invalide.' };
+
+  const fields = {};
+  if (title) fields.title = title;
+
+  for (const [key, max] of [
+    ['date', 80],
+    ['day', 2],
+    ['month', 10],
+    ['time', 40],
+    ['category', 60],
+    ['location', 200],
+    ['description', 3000],
+    ['speaker', 100],
+    ['image', 500],
+  ]) {
+    if (body?.[key] !== undefined) {
+      const value = optionalString(body[key], max);
+      if (value === null) return { error: `Champ "${key}" invalide.` };
+      fields[key] = value;
+    }
+  }
+
+  if (body?.featured !== undefined) fields.featured = !!body.featured;
+  return { data: fields };
+}
+
 // ======================== API ROUTES ========================
+
+app.post('/api/admin/login', (req, res) => {
+  const password = getAdminPassword();
+  if (!password) {
+    return res.status(503).json({
+      success: false,
+      message: 'Administration non configurée. Définissez ADMIN_PASSWORD dans .env.',
+    });
+  }
+  if (req.body?.password !== password) {
+    return res.status(401).json({ success: false, message: 'Mot de passe incorrect.' });
+  }
+  const token = createAdminToken();
+  res.json({ success: true, token });
+});
 
 // 1. Church Info
 app.get('/api/church-info', (req, res) => {
@@ -420,10 +760,13 @@ app.get('/api/sermons/:id', (req, res) => {
 });
 
 app.post('/api/sermons', (req, res) => {
+  const validation = validateSermonInput(req.body);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
   const newSermon = {
     id: `sermon-${Date.now()}`,
-    ...req.body,
-    featured: req.body.featured || false
+    ...validation.data,
+    featured: validation.data.featured || false
   };
   db.sermons.unshift(newSermon);
   saveDb();
@@ -433,7 +776,11 @@ app.post('/api/sermons', (req, res) => {
 app.put('/api/sermons/:id', (req, res) => {
   const index = db.sermons.findIndex(s => s.id === req.params.id);
   if (index === -1) return res.status(404).json({ success: false, message: "Prédication introuvable" });
-  db.sermons[index] = { ...db.sermons[index], ...req.body };
+
+  const validation = validateSermonInput(req.body, true);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
+  db.sermons[index] = { ...db.sermons[index], ...validation.data };
   saveDb();
   res.json({ success: true, data: db.sermons[index] });
 });
@@ -450,9 +797,12 @@ app.get('/api/events', (req, res) => {
 });
 
 app.post('/api/events', (req, res) => {
+  const validation = validateEventInput(req.body);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
   const newEvent = {
     id: `event-${Date.now()}`,
-    ...req.body
+    ...validation.data
   };
   db.events.unshift(newEvent);
   saveDb();
@@ -462,7 +812,11 @@ app.post('/api/events', (req, res) => {
 app.put('/api/events/:id', (req, res) => {
   const index = db.events.findIndex(e => e.id === req.params.id);
   if (index === -1) return res.status(404).json({ success: false, message: "Événement introuvable" });
-  db.events[index] = { ...db.events[index], ...req.body };
+
+  const validation = validateEventInput(req.body, true);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
+  db.events[index] = { ...db.events[index], ...validation.data };
   saveDb();
   res.json({ success: true, data: db.events[index] });
 });
@@ -512,15 +866,14 @@ app.get('/api/admin/prayers', (req, res) => {
 });
 
 app.post('/api/prayers', (req, res) => {
+  const validation = validatePrayerInput(req.body);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
   const newPrayer = {
     id: `pray-${Date.now()}`,
-    authorName: req.body.isAnonymous ? "Anonyme" : (req.body.authorName || "Anonyme"),
-    isAnonymous: !!req.body.isAnonymous,
-    category: req.body.category || "Autre",
-    requestText: req.body.requestText,
+    ...validation.data,
     prayerCount: 1,
     createdAt: new Date().toISOString(),
-    isPublic: req.body.isPublic !== false, // true = visible on prayer wall, false = confidential to pastors
     status: "approved"
   };
   db.prayers.unshift(newPrayer);
@@ -538,9 +891,12 @@ app.post('/api/prayers/:id/pray', (req, res) => {
 
 // 8. Visit Planner
 app.post('/api/visits', (req, res) => {
+  const validation = validateVisitInput(req.body);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
   const newVisit = {
     id: `visit-${Date.now()}`,
-    ...req.body,
+    ...validation.data,
     createdAt: new Date().toISOString(),
     status: "confirmed"
   };
@@ -573,14 +929,12 @@ app.get('/api/donations', (req, res) => {
 });
 
 app.post('/api/donations', (req, res) => {
+  const validation = validateDonationInput(req.body);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
   const newDonation = {
     id: `don-${Date.now()}`,
-    donorName: req.body.isAnonymous ? "Donateur Anonyme" : (req.body.donorName || "Donateur"),
-    email: req.body.email || "",
-    amount: Number(req.body.amount) || 50,
-    fund: req.body.fund || "Dîmes & Offrandes",
-    paymentMethod: req.body.paymentMethod || "Carte de crédit",
-    isAnonymous: !!req.body.isAnonymous,
+    ...validation.data,
     createdAt: new Date().toISOString()
   };
   if (!db.donations) db.donations = [];
@@ -595,9 +949,12 @@ app.post('/api/donations', (req, res) => {
 
 // 10. Contact
 app.post('/api/contact', (req, res) => {
+  const validation = validateContactInput(req.body);
+  if (validation.error) return rejectBadRequest(res, validation.error);
+
   const newContact = {
     id: `contact-${Date.now()}`,
-    ...req.body,
+    ...validation.data,
     createdAt: new Date().toISOString(),
     status: "new"
   };

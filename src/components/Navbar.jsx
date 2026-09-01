@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Menu, X, MapPin, Shield, Mail, Clock, MessageSquare
+  Menu, X, MapPin, Mail, Clock, MessageSquare
 } from 'lucide-react';
 import Logo from './Logo.jsx';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
@@ -42,7 +42,7 @@ export default function Navbar() {
     }`}>
       {/* Top Contact & Information Ribbon - Always sticky with header */}
       <div className="bg-[#14181F] text-[#E2E8F0] text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-[#2D3748]/70 backdrop-blur-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center">
           {/* Left contact info: worship hour, address, email */}
           <div className="flex items-center gap-3 sm:gap-6 text-[11px] sm:text-xs overflow-x-auto no-scrollbar py-0.5">
             <div className="flex items-center gap-1.5 text-[#F2B852] shrink-0 font-medium">
@@ -64,18 +64,6 @@ export default function Navbar() {
               <Mail className="w-3.5 h-3.5 text-[#D48E2E]" />
               <span>info@ccbethanie.ca</span>
             </a>
-          </div>
-
-          {/* Right link: Admin Portal */}
-          <div className="flex items-center gap-3 shrink-0 ml-2">
-            <Link 
-              to="/admin" 
-              className="text-gray-400 hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] sm:text-[11px] font-medium"
-              title="Espace Gestion Église"
-            >
-              <Shield className="w-3 h-3 text-amber-500" />
-              <span className="hidden sm:inline">{t('adminTitle')}</span>
-            </Link>
           </div>
         </div>
       </div>
@@ -257,12 +245,6 @@ export default function Navbar() {
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>{t('btnContact')}</span>
-              </Link>
-              <Link
-                to="/admin"
-                className="text-center text-xs text-gray-500 py-1"
-              >
-                ⚙️ {t('adminTitle')}
               </Link>
             </div>
           </div>

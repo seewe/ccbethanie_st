@@ -1,0 +1,42 @@
+# Communauté Chrétienne Béthanie — Site web
+
+## Lancer le site
+
+```bash
+npm install
+npm run dev
+```
+
+Site public : http://localhost:3000
+
+---
+
+## Connexion admin (équipe interne)
+
+Le lien admin n’apparaît pas sur le site public. Accès direct :
+
+| | |
+|---|---|
+| **URL** | http://localhost:3000/admin |
+| **Mot de passe** | `bethanie-admin` |
+
+> Mot de passe temporaire — à changer avant la mise en ligne.
+
+### Changer le mot de passe
+
+1. Copier le fichier d’exemple :
+   ```bash
+   cp .env.example .env
+   ```
+2. Modifier dans `.env` :
+   ```
+   ADMIN_PASSWORD="votre-nouveau-mot-de-passe"
+   ```
+3. Relancer le serveur (`npm run dev`).
+
+---
+
+## Rappel
+
+- **Visiteurs** : aucune connexion requise.
+- **Admin** : réservé à l’équipe (URL + mot de passe ci-dessus).

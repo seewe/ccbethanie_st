@@ -1,6 +1,5 @@
 {
   "name": "Communauté Chrétienne Béthanie",
   "description": "Site web officiel de la Communauté Chrétienne Béthanie (Église Presbytérienne au Canada). Une église vivante, chaleureuse et centrée sur Jésus-Christ à Montréal.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "requestFramePermissions": []
 }
