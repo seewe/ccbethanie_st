@@ -101,6 +101,24 @@ async function getMongoCollection() {
   }
 }
 
+// Content collections that are seeded from data_store.json and edited via
+// the admin UI. If any of these are missing/empty in an existing Mongo
+// document (e.g. because it was seeded before a data fix was deployed, or
+// before content was added), we backfill them from the bundled seed so a
+// stale empty document doesn't permanently shadow real content.
+const SEEDABLE_CONTENT_KEYS = [
+  "sermons",
+  "events",
+  "ministries",
+  "team",
+  "testimonials",
+  "prayers",
+];
+
+function getSeedFallback() {
+  return readSeedFromFile();
+}
+
 // Loads the full application data document.
 export async function loadDb() {
   const collection = await getMongoCollection();
@@ -108,6 +126,26 @@ export async function loadDb() {
     const doc = await collection.findOne({ _id: DOC_ID });
     if (doc) {
       const { _id, ...data } = doc;
+      const seed = getSeedFallback();
+      let needsBackfill = false;
+      for (const key of SEEDABLE_CONTENT_KEYS) {
+        const current = data[key];
+        if (
+          (!Array.isArray(current) || current.length === 0) &&
+          Array.isArray(seed[key]) &&
+          seed[key].length > 0
+        ) {
+          data[key] = seed[key];
+          needsBackfill = true;
+        }
+      }
+      if (needsBackfill) {
+        await collection.replaceOne(
+          { _id: DOC_ID },
+          { _id: DOC_ID, ...data },
+          { upsert: true },
+        );
+      }
       return data;
     }
     const seed = readSeedFromFile();
