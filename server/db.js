@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
 import { MongoClient } from "mongodb";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -8,6 +9,19 @@ const DATA_FILE = path.join(__dirname, "..", "data_store.json");
 const MONGO_DB_NAME = "bethanie_church";
 const MONGO_COLLECTION = "store";
 const DOC_ID = "main";
+
+// Statically require the seed data so bundlers (esbuild, used by Netlify
+// Functions) inline it as a JS object at build time. This is essential on
+// Netlify: the deployed function bundle does NOT include data_store.json on
+// disk, so fs.readFileSync(DATA_FILE) below fails there and would otherwise
+// silently fall back to the near-empty INITIAL_DATA stub.
+const require = createRequire(import.meta.url);
+let bundledSeedData = null;
+try {
+  bundledSeedData = require("../data_store.json");
+} catch {
+  bundledSeedData = null;
+}
 
 // Initial seed data representing Communauté Chrétienne Béthanie.
 // Used only if data_store.json is missing/unreadable and no Mongo document exists yet.
@@ -57,6 +71,11 @@ function readSeedFromFile() {
     }
   } catch (err) {
     console.error("Error reading local seed data file:", err.message);
+  }
+  // Serverless bundle path (e.g. Netlify Functions): data_store.json isn't
+  // present on disk, so use the copy inlined at build time via require().
+  if (bundledSeedData) {
+    return JSON.parse(JSON.stringify(bundledSeedData));
   }
   return { ...INITIAL_DATA };
 }
