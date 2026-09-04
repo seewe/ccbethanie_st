@@ -1,6 +1,6 @@
-import { Resvg } from '@resvg/resvg-js';
-import fs from 'fs';
-import path from 'path';
+import { Resvg } from "@resvg/resvg-js";
+import fs from "fs";
+import path from "path";
 
 const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="1200" height="850">
   <defs>
@@ -146,31 +146,18 @@ const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850
   </g>
 </svg>`;
 
-// Save SVG
-fs.writeFileSync('public/ccb-logo.svg', svgString);
-
-// Render high-resolution transparent PNGs with Resvg
+// Render high-resolution transparent PNG with Resvg
 const resvgMain = new Resvg(svgString, {
   fitTo: {
-    mode: 'width',
-    value: 1200
+    mode: "width",
+    value: 1200,
   },
-  background: 'rgba(0,0,0,0)' // Transparent background
+  background: "rgba(0,0,0,0)", // Transparent background
 });
 
 const pngData = resvgMain.render();
 const pngBuffer = pngData.asPng();
 
-fs.writeFileSync('public/ccb-logo.png', pngBuffer);
-fs.writeFileSync('public/logo.png', pngBuffer);
-fs.writeFileSync('public/CCB logo transparent.png', pngBuffer);
-fs.writeFileSync('public/ccb-logo-transparent.png', pngBuffer);
+fs.writeFileSync("public/ccb-logo.png", pngBuffer);
 
-// Also copy to src/assets for direct bundler imports if needed
-if (!fs.existsSync('src/assets')) {
-  fs.mkdirSync('src/assets', { recursive: true });
-}
-fs.writeFileSync('src/assets/ccb-logo.png', pngBuffer);
-fs.writeFileSync('src/assets/logo.png', pngBuffer);
-
-console.log('Successfully generated public/ccb-logo.png, public/logo.png, and src/assets/ccb-logo.png');
+console.log("Successfully generated public/ccb-logo.png");

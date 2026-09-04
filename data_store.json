@@ -5,10 +5,10 @@
     "slogan": "Une communauté pour vivre et partager la foi en Jésus-Christ.",
     "subSlogan": "Une église qui grandit dans la foi, l'amour et le service.",
     "foundedYear": 1998,
-    "address": "1234 Rue de la Foi, Montréal, QC H1A 1A1",
+    "address": "2401 avenue de l'abbé Giguere, Québec, QC G1C 0H4",
     "phone": "(514) 555-1234",
     "email": "info@ccbethanie.ca",
-    "sundayServiceTime": "Dimanche 10h30",
+    "sundayServiceTime": "Dimanche 13h00",
     "bibleStudyTime": "Mercredi 19h00",
     "prayerTime": "Vendredi 19h30",
     "livestreamUrl": "https://www.youtube.com",
@@ -20,7 +20,7 @@
     {
       "id": "sermon-1",
       "title": "Marcher par la foi et non par la vue",
-      "speaker": "Pasteur Jean Dupont",
+      "speaker": "PasteurNarcisse F. T",
       "role": "Pasteur principal",
       "date": "2025-05-18",
       "series": "Enracinés dans la Grâce",
@@ -68,7 +68,7 @@
       "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
       "audioUrl": "https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3",
       "duration": "35 min",
-      "description": "N'aimons pas seulement en paroles mais en actions concrètes dans notre ville de Montréal.",
+      "description": "N'aimons pas seulement en paroles mais en actions concrètes dans notre ville de Québec.",
       "keyPoints": [
         "Le sacrifice de Christ comme modèle d'amour",
         "Détecter les besoins autour de soi",
@@ -89,7 +89,7 @@
       "category": "Culte",
       "location": "Sanctuaire principal & En direct",
       "description": "Louange contemporaine, prédication vivante de la Parole, et programme Béthanie Kids pour les enfants de 0 à 12 ans.",
-      "speaker": "Pasteur Jean Dupont",
+      "speaker": "PasteurNarcisse F. T",
       "image": "https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&w=800&q=80",
       "featured": true
     },
@@ -153,79 +153,57 @@
   "ministries": [
     {
       "id": "min-culte",
-      "name": "Culte & Louange",
-      "shortDesc": "Rejoignez-nous chaque dimanche pour vivre la présence de Dieu dans la louange et la Parole.",
+      "name": "Chorale",
+      "shortDesc": "Rejoignez notre chorale pour élever la voix de l'assemblée dans la louange et l'adoration chaque dimanche.",
       "icon": "Church",
       "slug": "culte-louange",
-      "schedule": "Dimanche à 10h30",
+      "schedule": "Dimanche à 13h00",
       "target": "Toute la famille",
-      "image": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80",
-      "description": "Notre équipe de louange conduit l'assemblée dans des moments d'adoration chaleureux mêlant cantiques bibliques et chants contemporains."
+      "image": "/ci12.jpg",
+      "description": "Notre chorale accompagne l'assemblée dans des moments d'adoration chaleureux mêlant cantiques bibliques et chants contemporains, répétant chaque semaine pour offrir une louange vivante et priante."
     },
     {
       "id": "min-enfants",
-      "name": "Béthanie Kids (Enfants)",
+      "name": "Béthanie Kids (Culte d'enfants)",
       "shortDesc": "Un enseignement biblique adapté pour nos enfants dans un cadre sécurisé et joyeux.",
       "icon": "Baby",
       "slug": "enfants-bethanie-kids",
-      "schedule": "Pendant le culte du dimanche (10h30)",
+      "schedule": "Pendant le culte du dimanche (13h00)",
       "target": "0 à 12 ans (Pépinière, Éveil, Juniors)",
-      "image": "https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?auto=format&fit=crop&w=800&q=80",
+      "image": "/ci13.jpg",
       "description": "Une équipe d'éducateurs passionnés propose des leçons bibliques créatives, des bricolages, du chant et des jeux pour bâtir des fondations solides."
     },
     {
       "id": "min-jeunesse",
-      "name": "Ado & Jeunesse Connect",
+      "name": "Ado & Jeunesse Connectée",
       "shortDesc": "Des activités et des rencontres dynamiques pour grandir dans sa foi et s'épanouir.",
       "icon": "Users",
       "slug": "jeunesse-connect",
       "schedule": "1er et 3e vendredi à 19h00",
       "target": "13 à 25 ans",
-      "image": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+      "image": "/ci9.jpg",
       "description": "Un espace ouvert pour les ados et jeunes adultes pour aborder les vrais défis de la vie étudiante et professionnelle sous le prisme de l'Évangile."
     },
     {
       "id": "min-priere",
-      "name": "Prière & Intercession",
-      "shortDesc": "Nous croyons à la puissance agissante de la prière fervente et fraternelle.",
+      "name": "Mamans",
+      "shortDesc": "Un espace d'entraide, d'écoute et de prière pour les mamans de notre communauté.",
       "icon": "HandHelping",
       "slug": "priere-intercession",
       "schedule": "Vendredi 19h30 & Lundi 6h30 (Prière matinale)",
-      "target": "Tous les croyants",
-      "image": "https://images.unsplash.com/photo-1445445290350-18a3b86e0b5b?auto=format&fit=crop&w=800&q=80",
-      "description": "Un réseau d'intercesseurs dévoués qui portent les fardeaux de l'église, des requêtes personnelles et de la ville de Montréal."
-    },
-    {
-      "id": "min-servir",
-      "name": "Servir & Bénévolat",
-      "shortDesc": "De nombreuses façons de mettre vos dons spirituels et talents au service des autres.",
-      "icon": "HeartHandshake",
-      "slug": "servir-benevolat",
-      "schedule": "Selon les équipes (Accueil, Médias, Musique, Diaconat)",
-      "target": "Tous les membres",
-      "image": "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=800&q=80",
-      "description": "Chacun a reçu un talent pour l'édification commune. Découvrez votre ministère et rejoignez une équipe épanouissante."
-    },
-    {
-      "id": "min-evangelisation",
-      "name": "Évangélisation & Action Sociale",
-      "shortDesc": "Partager l'Évangile d'amour et impacter positivement notre quartier et le monde.",
-      "icon": "Globe",
-      "slug": "evangelisation-action-sociale",
-      "schedule": "Samedi matin & Projets spéciaux",
-      "target": "Communauté & Missionnaires",
-      "image": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=800&q=80",
-      "description": "Distribution alimentaire, soutien aux nouveaux arrivants et proclamation bienveillante de la Bonne Nouvelle de Jésus-Christ."
+      "target": "Toutes les mamans",
+      "image": "/ci11.jpg",
+      "description": "Un groupe de mamans qui se soutiennent mutuellement dans la prière, partagent leurs expériences de la maternité et portent ensemble les besoins de leurs familles et de l'église."
     }
   ],
   "team": [
     {
       "id": "team-1",
-      "name": "Pasteur Jean Dupont",
+      "name": "Pasteur Narcisse F. T",
       "role": "Pasteur principal",
       "bio": "Au service de la Communauté Chrétienne Béthanie depuis plus de 15 ans avec une passion pour l'enseignement biblique et l'accompagnement pastoral.",
-      "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-      "email": "jean.dupont@ccbethanie.ca"
+      "photo": "/past-narcisse.jpg",
+      "email": "narcisse.ft@ccbethanie.ca"
     },
     {
       "id": "team-2",
@@ -255,27 +233,55 @@
   "testimonials": [
     {
       "id": "test-1",
-      "author": "Marie K.",
-      "role": "Membre depuis 4 ans",
+      "author": "Carole M.",
+      "role": "Membre depuis 10 ans",
+      "role_en": "Member for 10 years",
       "quote": "Béthanie est devenue pour moi et ma famille une vraie maison. J'y ai trouvé l'amour authentique de Dieu, des enseignements profonds et des amis précieux sur qui je peux toujours compter.",
+      "quote_en": "Bethany has become a true home for me and my family. I found God's authentic love, deep teachings, and precious friends I can always count on.",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
     },
     {
       "id": "test-2",
-      "author": "David & Christine L.",
-      "role": "Famille avec 3 enfants",
+      "author": "Line N.",
+      "role": "Famille avec 4 enfants",
+      "role_en": "Family with 4 children",
       "quote": "Le programme des enfants est exceptionnel. Nos enfants ont hâte de venir chaque dimanche et nous nous sentons grandir spirituellement à chaque culte.",
+      "quote_en": "The children's program is outstanding. Our kids look forward to coming every Sunday, and we feel ourselves growing spiritually with every service.",
       "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80"
     },
     {
       "id": "test-3",
-      "author": "Jonathan P.",
-      "role": "Groupe Jeunesse Béthanie",
-      "quote": "Quand je suis arrivé à Montréal, je cherchais une communauté chrétienne chaleureuse. À Béthanie, j'ai été accueilli à bras ouverts dès le premier jour !",
+      "author": "Laurette H.",
+      "role": "Membre active du conseil d'ancien",
+      "role_en": "Active member of the elders' council",
+      "quote": "Quand je suis arrivé à Québec, je cherchais une communauté chrétienne chaleureuse. À Béthanie, j'ai été accueilli à bras ouverts dès le premier jour !",
+      "quote_en": "When I arrived in Montreal, I was looking for a warm Christian community. At Bethany, I was welcomed with open arms from day one!",
       "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80"
     }
   ],
   "prayers": [
+    {
+      "id": "pray-1788497929677",
+      "authorName": "Testor",
+      "isAnonymous": false,
+      "category": "Santé & Guérison",
+      "requestText": "Merci",
+      "prayerCount": 1,
+      "createdAt": "2026-09-04T04:58:49.677Z",
+      "isPublic": false,
+      "status": "approved"
+    },
+    {
+      "id": "pray-1788497880405",
+      "authorName": "test",
+      "isAnonymous": false,
+      "category": "Santé & Guérison",
+      "requestText": "test",
+      "prayerCount": 1,
+      "createdAt": "2026-09-04T04:58:00.405Z",
+      "isPublic": false,
+      "status": "approved"
+    },
     {
       "id": "pray-1788139021200",
       "authorName": "Anonyme",
