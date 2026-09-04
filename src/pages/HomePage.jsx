@@ -161,7 +161,7 @@ export default function HomePage({
         {/* Background Image with warm amber/gold atmospheric overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=2000&q=85"
+            src="/ci14.jpg"
             alt="Communauté Chrétienne Béthanie Rassemblement"
             className="w-full h-full object-cover object-center opacity-45 brightness-90 transform scale-105 transition-transform duration-1000 ease-out"
           />
